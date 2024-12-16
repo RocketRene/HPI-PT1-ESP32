@@ -1,38 +1,40 @@
-#include <Arduino.h>
-#define ONBOARD_LED_PIN 2
+#include <Adafruit_NeoPixel.h>
 
-int fib(int n)
-{
-    if (n <= 1) return n;  // Handle edge cases 0 and 1
-    
-    int a = 1, b = a;
-    for (; n > 2; n--)
-    {
-        b = a + b;
-        a = b - a;
-    }
-    return b;
-}
+#define NUM 30 // number of leds on the strip
+#define PIN 15 // data pin connected to led strip
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM, PIN, NEO_GRB + NEO_KHZ800);
+float t;
 
 void setup() {
-    pinMode(ONBOARD_LED_PIN, OUTPUT);
-    Serial.begin(9600);  // Initialize Serial communication at 9600 baud
+    strip.begin();
+    strip.show();
+    t = 0;
 }
 
 void loop() {
-    for (int i = 0; i < 10; i++) {
-        int fibNumber = fib(i);
-        Serial.print("Fibonacci(");
-        Serial.print(i);
-        Serial.print(") = ");
-        Serial.println(fibNumber);  // Print the fibonacci number with newline
-        
-        for (int j = 0; j < fibNumber; j++) {
-            digitalWrite(ONBOARD_LED_PIN, HIGH);
-            delay(200);
-            digitalWrite(ONBOARD_LED_PIN, LOW);
-            delay(200);
-        }
-        delay(2000);
+    float rainbowColorR = 0.0;
+    float rainbowColorG = PI * 0.67;
+    float rainbowColorB = PI * 1.33;
+
+    float r = 0.5 + 0.5 * sin(rainbowColorR + t);
+    r *= 255;
+    float g = 0.5 + 0.5 * sin(rainbowColorG + t);
+    g *= 255;
+    float b = 0.5 + 0.5 * sin(rainbowColorB + t);
+    b *= 255;
+
+    for (int i = 0; i < NUM; i++) {
+        strip.setPixelColor(i, r,g,b);
+        strip.show();
+        delay(10);
+        strip.setPixelColor(i, 0, 0, 0);
     }
+    for (int i = 0; i < NUM; i++) {
+        strip.setPixelColor(NUM - i -1, r,g,b);
+        strip.show();
+        delay(10);
+        strip.setPixelColor(NUM - i- 1, 0, 0, 0);
+    }
+    t += 0.1;
 }
