@@ -1,11 +1,10 @@
-/* Task: Blinking onboard LED fib(n) times with 2 seconds pause*/
- 
-#include <Arduino.h>            // useful functions defined here
-#include <stdio.h>
-#define ONBOARD_LED_PIN 2       // use this to control onboard led
- 
+#include <Arduino.h>
+#define ONBOARD_LED_PIN 2
+
 int fib(int n)
 {
+    if (n <= 1) return n;  // Handle edge cases 0 and 1
+    
     int a = 1, b = a;
     for (; n > 2; n--)
     {
@@ -15,15 +14,20 @@ int fib(int n)
     return b;
 }
 
- 
-void setup(){
+void setup() {
     pinMode(ONBOARD_LED_PIN, OUTPUT);
+    Serial.begin(9600);  // Initialize Serial communication at 9600 baud
 }
- 
-void loop(){
+
+void loop() {
     for (int i = 0; i < 10; i++) {
-        printf("%d", fib(i));
-        for (int j = 0; j < fib(i); j++) {
+        int fibNumber = fib(i);
+        Serial.print("Fibonacci(");
+        Serial.print(i);
+        Serial.print(") = ");
+        Serial.println(fibNumber);  // Print the fibonacci number with newline
+        
+        for (int j = 0; j < fibNumber; j++) {
             digitalWrite(ONBOARD_LED_PIN, HIGH);
             delay(200);
             digitalWrite(ONBOARD_LED_PIN, LOW);

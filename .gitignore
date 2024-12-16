@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+.cache/clangd/index
+.helix
+.pio/build
+.pio/libdeps/esp32dev/Adafruit NeoPixel
+.vscode
