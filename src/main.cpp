@@ -44,6 +44,19 @@ void stars(int count, uint8_t wait){
    * Implementiere hier den stars Effekt.
    * Dabei sollen nacheinander <count> viele LEDs gelb aufleuchten und langsam ausdimmen (die Geschwindigkeit wird von wait beeinflusst) bevor die nächste LED aufleuchtet. 
    */
+  srand(time(NULL));
+  strip.clear();
+  for (int i = 0; i < count; i++) {
+    int pix = rand() % strip.numPixels();
+    strip.setPixelColor(pix, 255, 255, 0);
+    for (int j = 255; j > 0; j--) {
+      strip.setBrightness(j);
+      strip.show();
+      delay(wait);
+    }
+    strip.setPixelColor(pix, 0, 0, 0);
+    strip.setBrightness(255);
+  }
 }
 
 // Slightly different, this makes the rainbow equally distributed throughout
