@@ -1,91 +1,77 @@
 #include <Adafruit_NeoPixel.h>
-#include <Arduino.h>
+#define PIN 15
 
-#include "silent_night.h"
-//#include "tetris.h"
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, PIN, NEO_GRB + NEO_KHZ800);
 
-/* The melody and rhythm are defined in the header above. */
-int const melody[] = MELODY; //contains the notes frequencies
-
-/* rhythm[] contains the notes durations in multiples of the shortest duration
- * so a 2 should be played two times longer than a 1 an a 3 three times as long
- * e.g. if the smalles note value in the song is a quarter note each 1 is a quarter note and each 2 is a half note (<- important if you want to code your own music)
- */
-int const rhythm[] = RHYTHM;
-
-/********************************************************/
-#define LOUDSPEAKER_PIN 4
-/********************************************************/
-
-void play(int note, long duration) { // a long is an int but can contain larger numbers
-  if (note == 0) {
-    delay(duration); // For rests, just wait for the duration
-    return;
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
   }
-  
-  /********************************************************/
-  /* The variable note gives you a frequency in Hz.
-     The variable duration is given in milliseconds.
-    
-     TODO:
-     3.) Generate a rectangular wave with the given
-     frequency and duration.
-     To do so, change the value at the loudspeaker pin
-     to HIGH and to LOW for a sufficient number of
-     times and wait an appropriate time after you set
-     each value.
-
-     Hint: Think about the resolutions you need!
-     You may want to use more percise functions.
-  */
-  long waitTime = 1000000 / (2 * note);
-  for (int i = 0; i < duration * note / 1000; i++) {
-    digitalWrite(LOUDSPEAKER_PIN, HIGH);
-    delayMicroseconds(waitTime);
-    digitalWrite(LOUDSPEAKER_PIN, LOW);
-    delayMicroseconds(waitTime);
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
   }
-
-  delay(10);
-
-  /********************************************************/
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 
-/* the setup routine runs once when you press reset: */
+// Fill the dots one after the other with a color
+void colorWipe(uint32_t c, uint8_t wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(i, c);
+    strip.show();
+    delay(wait);
+  }
+}
+
+void rainbow(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<256; j++) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i+j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+void stars(int count, uint8_t wait){
+  /*TODO: 
+   * Implementiere hier den stars Effekt.
+   * Dabei sollen nacheinander <count> viele LEDs gelb aufleuchten und langsam ausdimmen (die Geschwindigkeit wird von wait beeinflusst) bevor die nächste LED aufleuchtet. 
+   */
+}
+
+// Slightly different, this makes the rainbow equally distributed throughout
+void rainbowCycle(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
 void setup() {
-  pinMode(LOUDSPEAKER_PIN, OUTPUT);
+  strip.begin();
+  strip.show(); // Initialize all pixels to 'off'
 }
 
-/* the loop routine runs over and over again forever: */
 void loop() {
-  /********************************************************/
-  /* TODO:
-     2.) Look at the included melody.
-     How can you determine how long it is?
+  // Some example procedures showing how to display to the pixels:
+  colorWipe(strip.Color(255, 0, 0), 50); // Red
+  colorWipe(strip.Color(0, 255, 0), 50); // Green
+  colorWipe(strip.Color(0, 0, 255), 50); // Blue
 
-     Call play(int, long) with each note in the melody.
-     Play the shortest note for 200ms. 
+  stars(20, 2);
 
-     BONUS:
-     calculate duration of shortest note, given: 
-      - beats per minute 
-      - ratio of
-        - length of one beat (e.g. quarter, eighth, sixteenth)
-        - the shortest note of the song
-        when beat is a quarter note long and shortest note is an eighth, this should be 1/2
-    )
-  */
-  int len = 0;
-  while(melody[len] != -1) {
-    len++;
-  }
-
-  for (int i = 0; i < len; i++) {
-    play(melody[i], rhythm[i] * 200);
-  }
-
-
-  /********************************************************/
+  rainbow(20);
+  rainbowCycle(20);
 }
-
-
