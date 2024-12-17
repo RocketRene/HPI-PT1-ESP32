@@ -38,13 +38,15 @@ void play(int note, long duration) { // a long is an int but can contain larger 
      Hint: Think about the resolutions you need!
      You may want to use more percise functions.
   */
-  int waitTime = 1000 / (2 * note);
-  for (int i = 0; i < duration * note; i++) {
+  long waitTime = 1000000 / (2 * note);
+  for (int i = 0; i < duration * note / 1000; i++) {
     digitalWrite(LOUDSPEAKER_PIN, HIGH);
-    delay(waitTime);
+    delayMicroseconds(waitTime);
     digitalWrite(LOUDSPEAKER_PIN, LOW);
-    delay(waitTime);
+    delayMicroseconds(waitTime);
   }
+
+  delay(10);
 
   /********************************************************/
 }
