@@ -1,8 +1,8 @@
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 
-#include "silent_night.h"
-//#include "tetris.h"
+//#include "silent_night.h"
+#include "tetris.h"
 
 /* The melody and rhythm are defined in the header above. */
 int const melody[] = MELODY; //contains the notes frequencies
