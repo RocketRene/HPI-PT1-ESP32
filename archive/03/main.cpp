@@ -58,6 +58,7 @@ void updateStrip() {
 
 
 void setup() {
+  strip.setBrightness(100);
   for(int i = 0; i < NUM; i++) {
     colors[i] = 256 * (i) / strip.numPixels();
   }
