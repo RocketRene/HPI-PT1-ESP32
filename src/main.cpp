@@ -4,15 +4,19 @@
 
 #define NUM 28 // number of leds on the strip
 #define PIN 15 // data pin connected to led strip
+#define LOUDSPEAKER_PIN 4
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM, PIN, NEO_GRB + NEO_KHZ800);
 
-int colors[NUM];
+byte colors[NUM];
 int n = NUM;
 
+int min_freq = 330;
+int max_freq = 880;
+
 uint32_t c1 = 0xff << 16;
-uint32_t c2 = 0xff << 8;
-uint32_t c3 = 0xff;
+uint32_t c2 = 0x00328f; //0xff << 8;
+uint32_t c3 = 0x26bb00; //0xff;
 
 uint32_t interpolate(uint32_t c1, uint32_t c2, float ratio) {
   byte r1 = (c1 >> 16) & 0xFF;
@@ -56,8 +60,26 @@ void updateStrip() {
   strip.show();
 }
 
+void playFrequency(byte WheelPos) {
+  int note = min_freq + (WheelPos * (max_freq - min_freq)) / 255;
+  long duration = 60;
+  if(note == 0) {
+      delay(duration); // For rests, just wait for the duration
+      return;
+  }
+  
+  long waitTime = 1000000 / (2 * note);
+  for(int i = 0; i < duration * note / 1000; i++) {
+    digitalWrite(LOUDSPEAKER_PIN, HIGH);
+    delayMicroseconds(waitTime);
+    digitalWrite(LOUDSPEAKER_PIN, LOW);
+    delayMicroseconds(waitTime);
+  }
+}
+
 
 void setup() {
+  pinMode(LOUDSPEAKER_PIN, OUTPUT);
   strip.setBrightness(100);
   for(int i = 0; i < NUM; i++) {
     colors[i] = 256 * (i) / strip.numPixels();
@@ -71,24 +93,28 @@ void setup() {
 
 void loop() {
   if(n < 2) {
+    for(int i = 0; i < NUM; i++) {
+      playFrequency(colors[i]);
+      delay(10);
+    }
     delay(10000);
     std::random_shuffle(colors, colors + NUM - 1);
     n = NUM;
+    updateStrip();
     return;
   };
   
-	for(int *a = colors, *b = colors + 1; b < colors + n; a++, b++) {
-    updateStrip();
-    delay(200);
-    
+	for(byte *a = colors, *b = colors + 1; b < colors + n; a++, b++) {
 		if(*a > *b) {
       int temp = *a;
       *a = *b;
       *b = temp;
       updateStrip();
     }
-    delay(200);
+    int color_to_play = *a;
+    playFrequency(color_to_play);
+    delay(20);
 	}
-  delay(1000);
+  delay(200);
   n--;
 }
